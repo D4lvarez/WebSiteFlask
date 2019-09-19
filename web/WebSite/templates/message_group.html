@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<h1>Python & Socketio</h1>
+
+<div id="app">
+        <!-- Renderizará los nuevos mensajes -->
+        <section>
+            <div v-for="message in messages">
+                <p><strong>[[ message.username ]]</strong></p>
+                <p>[[ message.text ]]</p>
+            </div>
+        </section>
+        <!-- Formulario para introducir nuevos mensajes -->
+        <section>
+            <input v-model="newMessage" @keypress.enter="sendMessage" type="text" placeholder="Escribe un mensaje...">
+            <button @click="sendMessage">Enviar</button>
+        </section>
+    </div>
+    <!-- Importamos socket.io -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js"></script>
+    <!-- Importamos VueJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.3/vue.min.js"></script>
+    
+    <script>
+        // Conectamos con nuestro dominio
+        var socket = io.connect();
+        // Instanciamos VueJS
+        var app = new Vue({
+            el: "#app",
+            delimiters: ['[[', ']]'],
+            data: {
+                username: '{{ username }}',
+                // Le damos los mensajes del hitorial
+                messages: [
+                {% for message in chat %}
+                    {
+                        username: '{{ message.username }}',
+                        text: '{{ message.text }}'
+                    }{% if not loop.last %},{% endif %}
+                {% endfor %}
+                ],
+                newMessage: ''
+            },
+            methods: {
+                sendMessage: () => {
+                    // Enviamos el nuevo mensaje
+                    socket.emit('new_message', {
+                        
+                        username: app.username,
+                        text: app.newMessage
+                    });
+                    // Clear text
+                    app.$set(app, 'newMessage', '');
+                }
+            }
+        });
+
+        socket.on('connect', function() {
+            console.log('Connect')
+        });
+
+        socket.on('new_message', function(msg) {
+            // Recibimos los nuevos mensajes y los añadimos a nuestro array
+            let my_messages = app.messages;
+            my_messages.push({
+                username: msg.username,
+                text: msg.text
+            })
+            app.$set(app, 'messages', my_messages);
+        });
+    </script>
+
+{% endblock content %}
