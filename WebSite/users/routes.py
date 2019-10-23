@@ -83,7 +83,7 @@ def account():
 
         flash('Tu perfil ha sido actualizado!', 'success')
 
-        return redirect(url_for('account'))
+        return redirect(url_for('users.account'))
     
     elif request.method == 'GET':
 

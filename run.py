@@ -28,4 +28,4 @@ def new_message(message):
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host="50.190.180.86")
+    socketio.run(app, debug=True)
